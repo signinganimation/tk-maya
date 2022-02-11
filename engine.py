@@ -626,7 +626,7 @@ class MayaEngine(Engine):
         """
         Loard Maya compatible third-party tools.
         """
-        # AnimBot
+        # Load AnimBot
         import animBot
         animBot.toggle()
 
