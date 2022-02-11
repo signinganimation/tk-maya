@@ -518,6 +518,9 @@ class MayaEngine(Engine):
         # Run a series of app instance commands at startup.
         self._run_app_instance_commands()
 
+        # Load third-party tools
+        self._load_third_party_tools()
+
     def post_context_change(self, old_context, new_context):
         """
         Runs after a context change. The Maya event watching will be stopped
@@ -619,6 +622,14 @@ class MayaEngine(Engine):
                             known_commands,
                         )
 
+    def _load_third_party_tools(self):
+        """
+        Loard Maya compatible third-party tools.
+        """
+        # AnimBot
+        import animBot
+        animBot.toggle()
+        
     def destroy_engine(self):
         """
         Stops watching scene events and tears down menu.
