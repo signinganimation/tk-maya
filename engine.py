@@ -629,7 +629,49 @@ class MayaEngine(Engine):
         # AnimBot
         import animBot
         animBot.toggle()
+
+        # Load Studio Library
+        #
+        # Check if the Studio Library exists on any shelf or it would continue creating 
+        # the new shelf button every time Maya launches. 
+        does_exist, shelf_name = self._does_shelf_button_exist("Studio Library")
+        if does_exist:
+            msg = "Studio Library has been already on '{}' shelf. Skipped installing.".format(shelf_name)
+            # cmds.confirmDialog(title="Info", message=msg, button="Ok")
+            self.logger.warning(msg)
+        else:
+            # Use forward slashes in order to be evaluated properly in MEL
+            mel.eval('source "G:/Shared drives/signing-animation/software/studiolibrary/studiolibrary-2.9.6.b3/install.mel"')
+
+    def _does_shelf_button_exist(self, annotation):
+        """
+        Check if the shelf button with given annotation on the shelf with given name exists.
         
+        :param str annotation: The annotation to compare with one from shelfButton.
+
+        :returns: A tuple of a boolean that the shelf button exists and 
+                  a shelf name (string) that shelf button is found at.
+        """
+        # Get top shelf
+        gShelfTopLevel = mel.eval("$gShelfTopLevel=$gShelfTopLevel")
+        
+        # Get top shelf names
+        shelves = cmds.tabLayout(gShelfTopLevel, query=True, childArray=True)
+        
+        for shelf in shelves:
+            names = cmds.shelfLayout(shelf, query=True, childArray=True) or []
+            for name in names:
+                # Raise error when tryng to get a shelf button from a separator on the shelf, 
+                # so add error handling here.
+                try:
+                    annotation_from_button = cmds.shelfButton(name, query=True, annotation=True)
+                except RuntimeError:
+                    continue
+                if (annotation_from_button == annotation):
+                    return (True, shelf)
+        
+        return (False, None)
+
     def destroy_engine(self):
         """
         Stops watching scene events and tears down menu.
